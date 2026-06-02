@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+
+.pytest_cache/
+.ruff_cache/
+
+# CDK build output
+infra/cdk.out/
+
+# Local scratch
+tmp/

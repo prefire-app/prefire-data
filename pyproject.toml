@@ -1,0 +1,26 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+# E/W = pycodestyle  F = pyflakes  C90 = mccabe complexity
+# PLR = pylint refactor  I = isort  UP = pyupgrade
+select = ["E", "W", "F", "C90", "PLR", "I", "UP"]
+ignore = [
+    "PLR2004",  # magic-value-comparison — too noisy for scientific code
+    "PLR0913",  # too-many-arguments — not in project code contracts
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.pylint]
+max-statements = 50
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+markers = [
+    "acceptance: marks acceptance-criteria tests (deselect with '-m \"not acceptance\"')",
+]
