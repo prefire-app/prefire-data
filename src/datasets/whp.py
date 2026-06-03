@@ -37,16 +37,16 @@ def query(event: dict) -> dict:
 
     value, nodata = _read_pixel(lat, lon)
 
-    if nodata is not None and value == int(nodata):
+    is_nodata = value is None or (nodata is not None and value == int(nodata))
+    label = WHP_CLASS_LABELS.get(value) if value is not None else None
+    # WHP encodes 6=Non-burnable, 7=Water as valid classes but they fall
+    # outside the 1-5 scoring range — treat them as the null case.
+    if is_nodata or label is None:
         return {"zone": None, "whp_class": None, "source": SOURCE}
-    return {
-        "zone": WHP_CLASS_LABELS.get(value),
-        "whp_class": value,
-        "source": SOURCE,
-    }
+    return {"zone": label, "whp_class": value, "source": SOURCE}
 
 
-def _read_pixel(lat: float, lon: float) -> tuple[int, float | None]:
+def _read_pixel(lat: float, lon: float) -> tuple[int | None, float | None]:
     """Read a single pixel value (and nodata) from the WHP COG.
 
     Preconditions:
@@ -54,15 +54,18 @@ def _read_pixel(lat: float, lon: float) -> tuple[int, float | None]:
 
     Postconditions:
         - Returns (value, nodata) where value is the integer class at the
-          given lat/lon and nodata is the raster's nodata sentinel or None.
+          given lat/lon, or None if the point falls outside the raster
+          extent. nodata is the raster's nodata sentinel or None.
     """
     with rasterio.Env(AWS_NO_SIGN_REQUEST="NO"):
         with rasterio.open(WHP_COG_URI) as ds:
             xs, ys = warp_transform("EPSG:4326", ds.crs, [lon], [lat])
             row, col = ds.index(xs[0], ys[0])
+            nodata = ds.nodata
+            if not (0 <= row < ds.height and 0 <= col < ds.width):
+                return None, nodata
             window = ((row, row + 1), (col, col + 1))
             value = int(ds.read(1, window=window)[0, 0])
-            nodata = ds.nodata
     return value, nodata
 
 

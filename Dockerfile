@@ -1,5 +1,9 @@
 FROM public.ecr.aws/lambda/python:3.12
 
+# rasterio's bundled GDAL dynamically loads libexpat at runtime; AL2023 base
+# image doesn't include it.
+RUN dnf install -y expat && dnf clean all
+
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 

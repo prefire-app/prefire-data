@@ -18,6 +18,8 @@ class _FakeDataset:
         self._value = value
         self.nodata = nodata
         self.crs = "EPSG:5070"
+        self.height = 1000
+        self.width = 1000
 
     def index(self, x, y):  # noqa: ARG002
         return 10, 20
@@ -112,3 +114,34 @@ def test_ac_whp_missing_lat_returns_400():
 def test_ac_whp_lat_out_of_range_returns_400():
     with pytest.raises(ValueError, match="lat out of range"):
         whp.query(_event(lat=200.0, lon=-122.0))
+
+
+@pytest.mark.acceptance
+def test_ac_whp_non_burnable_returns_null():
+    """WHP encodes 6=Non-burnable, 7=Water — both should map to null."""
+    for v in (6, 7):
+        op, ep, wp = _patches(value=v, nodata=0)
+        with op, ep, wp:
+            result = whp.query(_event(lat=37.0, lon=-122.0))
+        assert result == {"zone": None, "whp_class": None, "source": whp.SOURCE}
+
+
+@pytest.mark.acceptance
+def test_ac_whp_out_of_raster_extent_returns_null():
+    """Points outside the COG's row/col bounds must not return a value."""
+
+    class _OOBDataset(_FakeDataset):
+        def index(self, x, y):  # noqa: ARG002
+            return -1, -1
+
+    @contextmanager
+    def _oob_open(*_a, **_kw):
+        yield _OOBDataset(value=1, nodata=0)
+
+    with (
+        patch.object(whp.rasterio, "open", _oob_open),
+        patch.object(whp.rasterio, "Env", MagicMock()),
+        patch.object(whp, "warp_transform", lambda *_a, **_kw: ([0.0], [0.0])),
+    ):
+        result = whp.query(_event(lat=35.0, lon=-150.0))
+    assert result == {"zone": None, "whp_class": None, "source": whp.SOURCE}
