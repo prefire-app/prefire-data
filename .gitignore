@@ -13,3 +13,4 @@ infra/cdk.out/
 
 # Local scratch
 tmp/
+data/out/
