@@ -8,7 +8,7 @@ set -euo pipefail
 
 S3_DEST="${1:?usage: prepare_whp_cog.sh s3://bucket/prefix/}"
 WORK="$(mktemp -d)"
-URL="https://www.fs.usda.gov/rds/archive/products/RDS-2015-0047-4/RDS-2015-0047-4_Data.zip"
+URL="https://www.fs.usda.gov/rds/archive/products/RDS-2015-0047-4/RDS-2015-0047-4.zip"
 
 echo "Downloading $URL ..."
 curl -L --fail -o "$WORK/whp.zip" "$URL"
