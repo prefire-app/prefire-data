@@ -67,6 +67,16 @@ class DataLambdaStack(Stack):
             )
         )
 
+        # Provisioned concurrency keeps one warm execution so /county calls
+        # from the API stack don't pay a multi-second cold start.
+        data_alias = _lambda.Alias(
+            self,
+            "DataAlias",
+            alias_name="live",
+            version=self.fn.current_version,
+            provisioned_concurrent_executions=1,
+        )
+
         http_api = apigwv2.HttpApi(
             self,
             "DataHttpApi",
@@ -80,7 +90,7 @@ class DataLambdaStack(Stack):
         http_api.add_routes(
             path="/{proxy+}",
             methods=[apigwv2.HttpMethod.ANY],
-            integration=apigwv2_integrations.HttpLambdaIntegration("DataFnIntegration", self.fn),
+            integration=apigwv2_integrations.HttpLambdaIntegration("DataFnIntegration", data_alias),
         )
 
         cdk.CfnOutput(self, "DataApiEndpoint", value=http_api.api_endpoint)
