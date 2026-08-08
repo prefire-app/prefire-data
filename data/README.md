@@ -34,6 +34,15 @@ stays the same. If it changes, update `WHP_COG_URI` in
 | 1–2       | Very Low / Low | `null` (0 pts) |
 | nodata    | —         | `null`                |
 
+## US county boundaries
+
+- **Source:** US Census Bureau cartographic boundary file
+  `cb_<vintage>_us_county_500k` (pre-simplified, ~3 MB).
+- **S3 location read by the Lambda:**
+  `s3://prefire-data/counties/cb_2024_us_county_500k.pkl`
+  (env var `COUNTY_INDEX_URI` overrides).
+- **Refresh:** see [`counties/README.md`](counties/README.md).
+
 ## Building footprints (per-state PMTiles)
 
 - **Source:** Overture Maps `buildings` theme (Microsoft + Google + OSM,

@@ -5,6 +5,9 @@ Currently hosts:
 
 - `GET /whp?lat=<float>&lon=<float>` — USFS Wildfire Hazard Potential (2023
   classified, CONUS).
+- `GET /county?lat=<float>&lon=<float>` — US county point-in-polygon lookup
+  (Census cb_2024_us_county_500k). Returns `stateFips`, `countyFips`,
+  `countyName`, `stateCode`.
 
 ## Layout
 

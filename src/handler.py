@@ -6,11 +6,12 @@ request path. Adding a new dataset requires:
   2. Registering it in the ROUTES table below.
 """
 
-from .datasets import whp
+from .datasets import county, whp
 from .utils.responses import error_response, json_response
 
 ROUTES = {
     "/whp": whp.query,
+    "/county": county.query,
     # "/fhsz":   fhsz.query,
     # "/parcel": parcel.query,
 }
